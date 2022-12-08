@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Program Kompresi Kel 13</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #111827;
+            color: #111827
+        }
+
+        .wrapper {
+            width: 450px;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+        }
+
+        .wrapper .upload-box {
+            height: 225px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 5px;
+            border: 2px dashed rgb(224, 224, 224);
+        }
+
+        .wrapper .upload-box img {
+            width: 64px;
+            height: 64px;
+        }
+        .wrapper.active .upload-box p {
+            display: none;
+        }
+        .wrapper.active .upload-box {
+            border: none;
+        }
+        .wrapper.active .upload-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .wrapper .upload-box p {
+            color: #111827;
+            font-size: 1.05rem;
+            margin-top: 20px;
+
+        }
+
+        .wrapper .content {
+            margin-top: 20px;
+        }
+
+        .content .row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .content .column {
+            padding: 5px;
+            width: 100%;
+        }
+        .content .column.width {
+            margin-right: 20px;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }.content .column.quality {
+            margin-left: 20px;
+        }.column.ratio label, .column.quality label {
+            font-size: ;
+        }
+
+        .row .column label {
+            font-size: 1.05rem;
+        }
+
+        .column.width input ,.column.height input {
+            width: 100%;
+            height: 45px;
+            outline: none;
+            padding: 0 10px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #111827;
+            margin-top: 7px;
+            
+        }
+        .download-btn {
+            padding: 15px 20px;
+            width: 100%;
+            background: #111827;
+            border-radius: 8px;
+            outline: none;
+            border: none;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .download-btn:hover {
+            transform: scale(1.05);
+            transition: 0.7s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="upload-box">
+            <img src="Gambar/upload.png" alt="">
+            <p>Browse File</p>
+            <input type="file" accept="image/*" hidden>
+        </div>
+        <div class="content">
+            <div class="row sizes">
+                <div class="column width">
+                    <label>Width</label>
+                    <input type="number">
+                </div>
+                <div class="column height">
+                    <label>Height</label>
+                    <input type="number">
+                </div>
+            </div> 
+            <div class="row checkboxes">
+                <div class="column ratio">
+                    <input type="checkbox" id="ratio" checked>
+                    <label for="ratio">Lock aspect ratio</label>
+                </div>
+                <div class="column quality">
+                    <input type="checkbox" id="quality">
+                    <label for="quality">Reduce Quality</label>
+                </div>
+            </div>
+            <button class="download-btn">Download img</button>
+        </div>
+
+    </div>
+
+
+    <script defer>
+        const uploadBox = document.querySelector(".upload-box"),
+        previewImg = document.querySelector("img"),
+        widthInput= document.querySelector(".width input"),
+        heightInput= document.querySelector(".height input"),
+        ratioInput= document.querySelector(".ratio input"),
+        downloadBtn= document.querySelector(".download-btn"),
+        qualityInput= document.querySelector(".quality input"),
+        fileInput = uploadBox.querySelector("input");
+        
+        let ogImageRatio;
+        const loadFile = (e) => {
+            const file = e.target.files [0]; //Pertama Kali dipilih user
+            if(!file) return;
+            previewImg.src = URL.createObjectURL(file);
+            previewImg.addEventListener("load", () => {
+                widthInput.value = previewImg.naturalWidth;
+                heightInput.value = previewImg.naturalHeight;
+                ogImageRatio = previewImg.naturalWidth / previewImg.naturalHeight;
+                document.querySelector(".wrapper").classList.add("active");
+                
+            });
+        }
+        widthInput.addEventListener("keyup", () => {
+            const height = ratioInput.checked ? widthInput.value / ogImageRatio : heightInput.value;
+            heightInput.value = Math.floor(height);
+        });
+        heightInput.addEventListener("keyup", () => {
+            const width = ratioInput.checked ? heightInput.value * ogImageRatio : widthInput.value;
+            widthInput.value = Math.floor(width);
+        });
+        const resizeAndDownload = () => {
+            const canvas = document.createElement ("canvas");
+            const a = document.createElement("a");
+            const ctx = canvas.getContext ("2d");
+            const imgQuality = qualityInput.checked ? 0.7 : 1.0;
+
+            canvas.height = heightInput.value;
+            canvas.width = widthInput.value;
+            
+            ctx.drawImage (previewImg, 0, 0, canvas.width, canvas.height);
+            
+            
+            a.href = canvas.toDataURL ("image/jpeg", imgQuality);
+            a.download = new Date ().getTime ();
+            a.click ()
+        }
+
+        downloadBtn.addEventListener ("click", resizeAndDownload);
+        fileInput.addEventListener ("change", loadFile)
+        uploadBox.addEventListener("click", () => fileInput.click());
+    </script>
+</body>
+
+</html>
